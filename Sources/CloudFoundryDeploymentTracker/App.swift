@@ -54,6 +54,7 @@ public struct CloudFoundryDeploymentTracker {
     if let appEnv = appEnv, trackerJson = buildTrackerJson(appEnv: appEnv), jsonString = trackerJson.rawString() {
       // do post request
       print("trackerJson: \(trackerJson)")
+      print("jsonString: \(jsonString)")
       
       var requestOptions: [ClientRequest.Options] = []
       requestOptions.append(.method("POST"))
@@ -63,13 +64,13 @@ public struct CloudFoundryDeploymentTracker {
       requestOptions.append(.path("/api/v1/track"))
       
       let req = HTTP.request(requestOptions) { response in
-        if let response = response where response.statusCode == HTTPStatusCode.OK || response.statusCode == HTTPStatusCode.accepted {
+        if let response = response where response.statusCode == HTTPStatusCode.OK || response.statusCode == HTTPStatusCode.created {
           Log.info("Uploaded stats \(response.status)")
           do {
             let body = NSMutableData()
             try response.readAllData(into: body)
             let jsonResponse = JSON(data: body)
-            Log.info("Deployment Tracker response: \(jsonResponse)")
+            Log.info("Deployment Tracker response: \(jsonResponse.rawValue)")
           } catch {
             Log.error("Bad JSON doc received from deployment tracker.")
           }
@@ -98,6 +99,9 @@ public struct CloudFoundryDeploymentTracker {
       let dateFormatter = DateFormatter()
       dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
       jsonEvent["date_sent"].stringValue = dateFormatter.string(from: Date())
+
+      jsonEvent["code_version"].stringValue = "0.1"
+      jsonEvent["repository_url"].stringValue = "https://github.com/IBM-Swift/Kitura-Starter-Bluemix.git"
 
       jsonEvent["runtime"].stringValue = "swift"
       jsonEvent["application_name"].stringValue = vcapApplication.name
