@@ -21,8 +21,12 @@ let package = Package(
     targets: [
         Target(
             name: "Kitura-Starter-Bluemix",
+            dependencies: [.Target(name: "CloudFoundryDeploymentTracker")]
+        ),        
+        Target(
+            name: "CloudFoundryDeploymentTracker",
             dependencies: []
-        )
+        ),
     ],
     dependencies: [
         .Package(url: "https://github.com/IBM-Swift/Kitura.git", majorVersion: 0, minor: 22),
