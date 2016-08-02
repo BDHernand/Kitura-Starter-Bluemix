@@ -50,11 +50,12 @@ public struct CloudFoundryDeploymentTracker {
   }
 
   public func track() {
-
-    if let appEnv = appEnv, trackerJson = buildTrackerJson(appEnv: appEnv), jsonString = trackerJson.rawString() {
+    // Try raw data!!
+    if let appEnv = appEnv, trackerJson = buildTrackerJson(appEnv: appEnv){//, jsonString = trackerJson.rawString() {
+      let jsonString = try? trackerJson.rawData()
       // do post request
-      print("trackerJson: \(trackerJson)")
-      print("jsonString: \(jsonString)")
+      Log.verbose("trackerJson: \(trackerJson.rawValue)")
+      Log.verbose("jsonString: \(jsonString?.length)")
       
       var requestOptions: [ClientRequest.Options] = []
       requestOptions.append(.method("POST"))
@@ -79,7 +80,7 @@ public struct CloudFoundryDeploymentTracker {
           Log.error("Failed to send tracking data with status code: \(response?.status)")
         }
       }
-      req.end(jsonString)
+      req.end(jsonString!)
       
     } else {
       Log.error("Failed to build valid JSON for deployment tracker.")
@@ -127,6 +128,7 @@ public struct CloudFoundryDeploymentTracker {
             let newService = JSON(["count" : 1, "plans" : [service.plan]])
             serviceDictionary[service.label] = newService
           }
+          print("PLAnS: \(serviceDictionary[service.label]?["plans"])")
         }
         jsonEvent["bound_vcap_services"] = JSON(serviceDictionary)
       }
